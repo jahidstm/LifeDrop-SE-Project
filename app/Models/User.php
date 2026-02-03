@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
+        'avatar',
+        'is_verified_student',
+        'is_active',
     ];
 
     /**
@@ -44,5 +49,26 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+
+    public function donorProfile()
+    {
+        return $this->hasOne(DonorProfile::class);
+    }
+
+    public function bloodRequests()
+    {
+        return $this->hasMany(BloodRequest::class);
+    }
+
+    public function donations()
+    {
+        return $this->hasMany(Donation::class, 'donor_id');
+    }
+
+    public function recurringRequests()
+    {
+        return $this->hasMany(RecurringRequest::class);
     }
 }
