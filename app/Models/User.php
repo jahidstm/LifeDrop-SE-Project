@@ -2,78 +2,92 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
-        'name',
-        'email',
-        'password',
         'phone',
-        'blood_group',
-        'district',
-        'upazila',
-        'last_donation_date',
-        'is_available',
-        'total_donations',
-        'points',
+        'password',
+        'role',
+        'status',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    // Relationships
+    public function donor()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasOne(Donor::class);
     }
 
-
-    public function donorProfile()
+    public function organization()
     {
-        return $this->hasOne(DonorProfile::class);
+        return $this->hasOne(Organization::class);
     }
 
-    public function bloodRequests()
+    public function adminActivities()
     {
-        return $this->hasMany(BloodRequest::class);
+        return $this->hasMany(AdminActivity::class, 'admin_id');
     }
 
-    public function donations()
+    public function approvedOrganizationMembers()
     {
-        return $this->hasMany(Donation::class, 'donor_id');
+        return $this->hasMany(OrganizationMember::class, 'approved_by');
     }
 
-    public function recurringRequests()
+    public function verifiedNidRecords()
     {
-        return $this->hasMany(RecurringRequest::class);
+        return $this->hasMany(NidVerification::class, 'verified_by');
+    }
+
+    public function reportResolvedBy()
+    {
+        return $this->hasMany(Report::class, 'resolved_by');
+    }
+
+    public function confirmedDonations()
+    {
+        return $this->hasMany(Donation::class, 'confirmed_by');
+    }
+
+    public function blogPosts()
+    {
+        return $this->hasMany(BlogPost::class, 'author_id');
+    }
+
+    // Scopes
+    public function scopeDonors($query)
+    {
+        return $query->where('role', 'donor');
+    }
+
+    public function scopeOrganizations($query)
+    {
+        return $query->where('role', 'organization');
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
     }
 }

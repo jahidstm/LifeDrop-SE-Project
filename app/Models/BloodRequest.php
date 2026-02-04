@@ -9,15 +9,64 @@ class BloodRequest extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'request_code',
+        'patient_name',
+        'required_blood_group',
+        'quantity',
+        'district',
+        'upazila',
+        'hospital_name',
+        'phone_number',
+        'urgency_level',
+        'status',
+        'latitude',
+        'longitude',
+        'notes',
+        'expires_at',
+    ];
 
-    public function user()
+    protected $casts = [
+        'latitude' => 'float',
+        'longitude' => 'float',
+        'expires_at' => 'datetime',
+    ];
+
+    // Relationships
+    public function responses()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(BloodRequestResponse::class);
     }
 
-    public function donations()
+    public function acceptedResponses()
     {
-        return $this->hasMany(Donation::class);
+        return $this->hasMany(BloodRequestResponse::class)
+            ->where('response_status', 'accepted');
+    }
+
+    // Scopes
+    public function scopeOpen($query)
+    {
+        return $query->where('status', 'open');
+    }
+
+    public function scopeCritical($query)
+    {
+        return $query->where('urgency_level', 'critical');
+    }
+
+    public function scopeByBloodGroup($query, $bloodGroup)
+    {
+        return $query->where('required_blood_group', $bloodGroup);
+    }
+
+    public function scopeByDistrict($query, $district)
+    {
+        return $query->where('district', $district);
+    }
+
+    public function scopeRecent($query)
+    {
+        return $query->orderBy('created_at', 'desc');
     }
 }
