@@ -6,16 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('donors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade');
-            $table->enum('blood_group', ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('blood_group');
             $table->string('district');
             $table->string('upazila');
-            $table->date('last_donation_date')->nullable();
-            $table->date('next_eligible_date')->nullable();
             $table->enum('availability_status', ['ready', 'unavailable', 'cooldown'])->default('ready');
             $table->boolean('is_verified')->default(false);
             $table->boolean('hide_phone_number')->default(false);
@@ -24,14 +25,12 @@ return new class extends Migration
             $table->string('current_badge')->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->timestamps();
-
-            $table->index('blood_group');
-            $table->index('district');
-            $table->index('availability_status');
-            $table->index('is_verified');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('donors');
