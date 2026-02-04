@@ -57,18 +57,15 @@
                 <x-input-error :messages="$errors->get('blood_group')" class="mt-2" />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div>
-                    <x-input-label for="division" :value="__('Division')" />
-                    <x-text-input id="division" class="block mt-1 w-full" type="text" name="division" required placeholder="Dhaka" />
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
                     <x-input-label for="district" :value="__('District')" />
-                    <x-text-input id="district" class="block mt-1 w-full" type="text" name="district" required placeholder="Dhaka" />
+                    <x-text-input id="district" class="block mt-1 w-full" type="text" name="district" required placeholder="Ex: Dhaka" />
                 </div>
+
                 <div>
                     <x-input-label for="upazila" :value="__('Upazila')" />
-                    <x-text-input id="upazila" class="block mt-1 w-full" type="text" name="upazila" required placeholder="Savar" />
+                    <x-text-input id="upazila" class="block mt-1 w-full" type="text" name="upazila" required placeholder="Ex: Savar" />
                 </div>
             </div>
         </div>
