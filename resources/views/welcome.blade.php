@@ -13,20 +13,32 @@
         </p>
 
         <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl mx-auto border border-slate-200">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <select class="border p-3 rounded-md w-full text-slate-600">
-                    <option>জেলা নির্বাচন করুন</option>
-                </select>
-                <select class="border p-3 rounded-md w-full text-slate-600">
-                    <option>উপজেলা</option>
-                </select>
-                <select class="border p-3 rounded-md w-full text-slate-600">
-                    <option>রক্তের গ্রুপ</option>
-                </select>
-                <button class="bg-[#E63946] text-white py-3 rounded-md font-bold hover:bg-red-700 transition">
-                    রক্তদাতা খুঁজুন
-                </button>
-            </div>
+            <form action="{{ route('donors.search') }}" method="GET">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                    <select name="district" id="district" class="border p-3 rounded-md w-full text-slate-600 focus:outline-none focus:border-red-500">
+                        <option value="">জেলা নির্বাচন করুন</option>
+                        @foreach($districts as $district)
+                        <option value="{{ $district }}">{{ $district }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="upazila" id="upazila" class="border p-3 rounded-md w-full text-slate-600 focus:outline-none focus:border-red-500">
+                        <option value="">উপজেলা</option>
+                    </select>
+
+                    <select name="blood_group" class="border p-3 rounded-md w-full text-slate-600 focus:outline-none focus:border-red-500">
+                        <option value="">রক্তের গ্রুপ</option>
+                        @foreach($bloodGroups as $bg)
+                        <option value="{{ $bg }}">{{ $bg }}</option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit" class="bg-[#E63946] text-white py-3 rounded-md font-bold hover:bg-red-700 transition w-full">
+                        রক্তদাতা খুঁজুন
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </section>
@@ -47,4 +59,39 @@
         </div>
     </div>
 </section>
+
+<script>
+    const upazilaData = {
+        'ঢাকা': ['সাভার', 'ধামরাই', 'কেরানীগঞ্জ', 'দোহার', 'নবাবগঞ্জ', 'মিরপুর', 'উত্তরা', 'ধানমন্ডি'],
+        'চট্টগ্রাম': ['রাউজান', 'পটিয়া', 'ফটিকছড়ি', 'হাটহাজারী', 'সীতাকুণ্ড', 'পাহাড়তলী'],
+        'সিলেট': ['সিলেট সদর', 'বিয়ানীবাজার', 'গোলাপগঞ্জ', 'কোম্পানীগঞ্জ'],
+        'রাজশাহী': ['রাজশাহী সদর', 'বাঘা', 'চারঘাট', 'পুঠিয়া'],
+        'খুলনা': ['খুলনা সদর', 'ডুমুরিয়া', 'ফুলতলা'],
+        'বরিশাল': ['বরিশাল সদর', 'বাকেরগঞ্জ', 'বাবুগঞ্জ'],
+        'রংপুর': ['রংপুর সদর', 'পীরগাছা', 'কাউনিয়া'],
+        'ময়মনসিংহ': ['ময়মনসিংহ সদর', 'মুক্তাগাছা', 'ভালুকা'],
+        'কুমিল্লা': ['কুমিল্লা সদর', 'চৌদ্দগ্রাম', 'লাকসাম', 'দাউদকান্দি'],
+        'নোয়াখালী': ['নোয়াখালী সদর', 'বেগমগঞ্জ', 'চাটখিল'],
+        'ফেনী': ['ফেনী সদর', 'দাগনভূঞা', 'সোনাগাজী'],
+        'বগুড়া': ['বগুড়া সদর', 'শিবগঞ্জ', 'শেরপুর'],
+        'সাভার': ['সাভার সদর', 'আশুলিয়া', 'আমিনবাজার', 'হেমায়েতপুর']
+    };
+
+    document.getElementById('district').addEventListener('change', function() {
+        const selectedDistrict = this.value;
+        const upazilaDropdown = document.getElementById('upazila');
+
+        // আগের অপশন ক্লিয়ার করা
+        upazilaDropdown.innerHTML = '<option value="">উপজেলা</option>';
+
+        if (selectedDistrict && upazilaData[selectedDistrict]) {
+            upazilaData[selectedDistrict].forEach(upazila => {
+                const option = document.createElement('option');
+                option.value = upazila;
+                option.textContent = upazila;
+                upazilaDropdown.appendChild(option);
+            });
+        }
+    });
+</script>
 @endsection
