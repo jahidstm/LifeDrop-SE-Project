@@ -12,19 +12,20 @@
             জরুরি মুহূর্তে আপনার এলাকার ভেরিফাইড রক্তদাতা খুঁজুন। দ্রুত এবং নির্ভরযোগ্যভাবে রক্তদাতা খুঁজে পান।
         </p>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg max-w-3xl mx-auto border border-slate-200">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto border border-slate-200">
             <form action="{{ route('donors.search') }}" method="GET">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+                    <select name="division" id="division" class="border p-3 rounded-md w-full text-slate-600 focus:outline-none focus:border-red-500">
+                        <option value="">বিভাগ নির্বাচন করুন</option>
+                    </select>
 
                     <select name="district" id="district" class="border p-3 rounded-md w-full text-slate-600 focus:outline-none focus:border-red-500">
                         <option value="">জেলা নির্বাচন করুন</option>
-                        @foreach($districts as $district)
-                        <option value="{{ $district }}">{{ $district }}</option>
-                        @endforeach
                     </select>
 
                     <select name="upazila" id="upazila" class="border p-3 rounded-md w-full text-slate-600 focus:outline-none focus:border-red-500">
-                        <option value="">উপজেলা</option>
+                        <option value="">উপজেলা নির্বাচন করুন</option>
                     </select>
 
                     <select name="blood_group" class="border p-3 rounded-md w-full text-slate-600 focus:outline-none focus:border-red-500">
@@ -61,37 +62,54 @@
 </section>
 
 <script>
-    const upazilaData = {
-        'ঢাকা': ['সাভার', 'ধামরাই', 'কেরানীগঞ্জ', 'দোহার', 'নবাবগঞ্জ', 'মিরপুর', 'উত্তরা', 'ধানমন্ডি'],
-        'চট্টগ্রাম': ['রাউজান', 'পটিয়া', 'ফটিকছড়ি', 'হাটহাজারী', 'সীতাকুণ্ড', 'পাহাড়তলী'],
-        'সিলেট': ['সিলেট সদর', 'বিয়ানীবাজার', 'গোলাপগঞ্জ', 'কোম্পানীগঞ্জ'],
-        'রাজশাহী': ['রাজশাহী সদর', 'বাঘা', 'চারঘাট', 'পুঠিয়া'],
-        'খুলনা': ['খুলনা সদর', 'ডুমুরিয়া', 'ফুলতলা'],
-        'বরিশাল': ['বরিশাল সদর', 'বাকেরগঞ্জ', 'বাবুগঞ্জ'],
-        'রংপুর': ['রংপুর সদর', 'পীরগাছা', 'কাউনিয়া'],
-        'ময়মনসিংহ': ['ময়মনসিংহ সদর', 'মুক্তাগাছা', 'ভালুকা'],
-        'কুমিল্লা': ['কুমিল্লা সদর', 'চৌদ্দগ্রাম', 'লাকসাম', 'দাউদকান্দি'],
-        'নোয়াখালী': ['নোয়াখালী সদর', 'বেগমগঞ্জ', 'চাটখিল'],
-        'ফেনী': ['ফেনী সদর', 'দাগনভূঞা', 'সোনাগাজী'],
-        'বগুড়া': ['বগুড়া সদর', 'শিবগঞ্জ', 'শেরপুর'],
-        'সাভার': ['সাভার সদর', 'আশুলিয়া', 'আমিনবাজার', 'হেমায়েতপুর']
-    };
+    const divisionSelect = document.getElementById('division');
+    const districtSelect = document.getElementById('district');
+    const upazilaSelect = document.getElementById('upazila');
 
-    document.getElementById('district').addEventListener('change', function() {
-        const selectedDistrict = this.value;
-        const upazilaDropdown = document.getElementById('upazila');
+    fetch('/data/bd-locations.json')
+        .then(res => res.json())
+        .then(data => {
+            const divisions = data.divisions || {};
 
-        // আগের অপশন ক্লিয়ার করা
-        upazilaDropdown.innerHTML = '<option value="">উপজেলা</option>';
-
-        if (selectedDistrict && upazilaData[selectedDistrict]) {
-            upazilaData[selectedDistrict].forEach(upazila => {
+            // fill divisions
+            Object.keys(divisions).forEach(division => {
                 const option = document.createElement('option');
-                option.value = upazila;
-                option.textContent = upazila;
-                upazilaDropdown.appendChild(option);
+                option.value = division;
+                option.textContent = division;
+                divisionSelect.appendChild(option);
             });
-        }
-    });
+
+            divisionSelect.addEventListener('change', function() {
+                const division = this.value;
+
+                districtSelect.innerHTML = '<option value="">জেলা নির্বাচন করুন</option>';
+                upazilaSelect.innerHTML = '<option value="">উপজেলা নির্বাচন করুন</option>';
+
+                if (divisions[division]) {
+                    Object.keys(divisions[division]).forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                }
+            });
+
+            districtSelect.addEventListener('change', function() {
+                const division = divisionSelect.value;
+                const district = this.value;
+
+                upazilaSelect.innerHTML = '<option value="">উপজেলা নির্বাচন করুন</option>';
+
+                if (divisions[division] && divisions[division][district]) {
+                    divisions[division][district].forEach(upazila => {
+                        const option = document.createElement('option');
+                        option.value = upazila;
+                        option.textContent = upazila;
+                        upazilaSelect.appendChild(option);
+                    });
+                }
+            });
+        });
 </script>
 @endsection
