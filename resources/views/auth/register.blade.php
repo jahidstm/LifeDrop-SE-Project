@@ -43,7 +43,7 @@
 
             <div>
                 <x-input-label for="blood_group" :value="__('Blood Group')" />
-                <select id="blood_group" name="blood_group" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                <select id="blood_group" name="blood_group" class="block mt-1 w-full border-gray-300 focus:border-[#E63946] focus:ring-[#E63946] rounded-md shadow-sm" required>
                     <option value="">Select Group</option>
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
@@ -57,28 +57,28 @@
                 <x-input-error :messages="$errors->get('blood_group')" class="mt-2" />
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+
+                <div>
+                    <x-input-label for="division" :value="__('Division')" />
+                    <select id="division" name="division" class="block mt-1 w-full border-gray-300 focus:border-[#E63946] focus:ring-[#E63946] rounded-md shadow-sm" required>
+                        <option value="">Select Division</option>
+                    </select>
+                    <x-input-error :messages="$errors->get('division')" class="mt-2" />
+                </div>
+
                 <div>
                     <x-input-label for="district" :value="__('District')" />
-                    <select id="district" name="district" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required onchange="loadAreas()">
-                        <option value="" disabled selected>Select District</option>
-                        <option value="Dhaka">Dhaka</option>
-                        <option value="Chattogram">Chattogram</option>
-                        <option value="Sylhet">Sylhet</option>
-                        <option value="Rajshahi">Rajshahi</option>
-                        <option value="Khulna">Khulna</option>
-                        <option value="Barishal">Barishal</option>
-                        <option value="Rangpur">Rangpur</option>
-                        <option value="Mymensingh">Mymensingh</option>
-                        <option value="Comilla">Comilla</option>
+                    <select id="district" name="district" class="block mt-1 w-full border-gray-300 focus:border-[#E63946] focus:ring-[#E63946] rounded-md shadow-sm disabled:bg-gray-100" disabled required>
+                        <option value="">Select District</option>
                     </select>
                     <x-input-error :messages="$errors->get('district')" class="mt-2" />
                 </div>
 
                 <div>
-                    <x-input-label for="upazila" :value="__('Upazila')" />
-                    <select id="upazila" name="upazila" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                        <option value="" disabled selected>Select District First</option>
+                    <x-input-label for="upazila" :value="__('Area / Upazila')" />
+                    <select id="upazila" name="upazila" class="block mt-1 w-full border-gray-300 focus:border-[#E63946] focus:ring-[#E63946] rounded-md shadow-sm disabled:bg-gray-100" disabled required>
+                        <option value="">Select Area</option>
                     </select>
                     <x-input-error :messages="$errors->get('upazila')" class="mt-2" />
                 </div>
@@ -86,105 +86,74 @@
         </div>
 
         <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md" href="{{ route('login') }}">
+            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
 
-            <x-primary-button class="ms-4">
+            <x-primary-button class="ms-4 bg-[#E63946] hover:bg-red-700">
                 {{ __('Register') }}
             </x-primary-button>
         </div>
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const divisionSelect = document.getElementById('division');
+            const districtSelect = document.getElementById('district');
+            const upazilaSelect = document.getElementById('upazila');
+
+            // JSON ডাটা লোড করা
+            fetch('/data/bd-locations.json')
+                .then(res => res.json())
+                .then(data => {
+                    const divisions = data.divisions || data;
+
+                    // বিভাগ অপশন যোগ করা
+                    Object.keys(divisions).sort().forEach(div => {
+                        const option = document.createElement('option');
+                        option.value = div;
+                        option.text = div;
+                        divisionSelect.appendChild(option);
+                    });
+
+                    // বিভাগ পাল্টালে জেলা লোড
+                    divisionSelect.addEventListener('change', function() {
+                        const selectedDiv = this.value;
+                        districtSelect.innerHTML = '<option value="">Select District</option>';
+                        upazilaSelect.innerHTML = '<option value="">Select Area</option>';
+                        districtSelect.disabled = true;
+                        upazilaSelect.disabled = true;
+
+                        if (selectedDiv && divisions[selectedDiv]) {
+                            districtSelect.disabled = false;
+                            Object.keys(divisions[selectedDiv]).sort().forEach(dist => {
+                                const option = document.createElement('option');
+                                option.value = dist;
+                                option.text = dist;
+                                districtSelect.appendChild(option);
+                            });
+                        }
+                    });
+
+                    // জেলা পাল্টালে উপজেলা লোড
+                    districtSelect.addEventListener('change', function() {
+                        const selectedDiv = divisionSelect.value;
+                        const selectedDist = this.value;
+                        upazilaSelect.innerHTML = '<option value="">Select Area</option>';
+                        upazilaSelect.disabled = true;
+
+                        if (selectedDist && divisions[selectedDiv][selectedDist]) {
+                            upazilaSelect.disabled = false;
+                            divisions[selectedDiv][selectedDist].sort().forEach(upa => {
+                                const option = document.createElement('option');
+                                option.value = upa;
+                                option.text = upa;
+                                upazilaSelect.appendChild(option);
+                            });
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading location data:', error));
+        });
+    </script>
 </x-guest-layout>
-
-<script>
-    // বাংলাদেশের সব জেলা ও তাদের উপজেলা/এরিয়া সম্পূর্ণ লিস্ট (Alphabetically Sorted)
-    const locationData = {
-        "Barishal": [
-            "Aricha", "Babuganj", "Bakerganj", "Banaripara",
-            "Bhola", "Chandpur", "Daulatkhan", "Gaurnadi",
-            "Gournadi", "Hizla", "Jhalokati", "Mehendiganj",
-            "Muladi", "Sadar", "Tazumuddin"
-        ],
-        "Chattogram": [
-            "Anwara", "Bayazid", "Begumganj", "Boalkhali",
-            "Banshkhali", "Double Mooring", "Fatikchari", "Hathazari",
-            "Juraichhari", "Kotwali", "Lohagara", "Mirsharai",
-            "Pahartali", "Panchlaish", "Patiya", "Rangunia",
-            "Raozan", "Sandwip", "Satkania", "Sitakunda"
-        ],
-        "Comilla": [
-            "Barura", "Brahmanpara", "Burichang", "Chandpur",
-            "Chauddagram", "Debidwar", "Daudkandi", "Hajiganj",
-            "Homna", "Laksham", "Monoharganj", "Muradnagar",
-            "Noakhali", "Sadar", "Sandwip", "Senbag",
-            "Sonagazi", "Sutrarkandi"
-        ],
-        "Dhaka": [
-            "Banani", "Baridhara", "Dhanmondi", "Dohar",
-            "Farmgate", "Gulshan", "Kakrail", "Kawran Bazar",
-            "Keraniganj", "Khilkhet", "Mirpur", "Mohammadpur",
-            "Motijheel", "Nawabganj", "Paltan", "Purana Paltan",
-            "Rampura", "Savar", "Shahbag", "Uttara"
-        ],
-        "Khulna": [
-            "Abhayanagar", "Assasuni", "Batiaghata", "Daulatpur",
-            "Debhata", "Dighalia", "Dumuria", "Jessore",
-            "Kaliganj", "Khan Jahan Ali", "Koira", "Paikgachha",
-            "Phultala", "Rupsha", "Sadar", "Satkhira",
-            "Sharankhola", "Sonadanga", "Khalishpur", "Terokhada"
-        ],
-        "Mymensingh": [
-            "Bhaluka", "Dhobaura", "Gafargaon", "Haluaghat",
-            "Jamalpur", "Madan", "Muktagachha", "Nandail",
-            "Nalitabari", "Phulpur", "Sadar", "Sarispur",
-            "Sherpur", "Tahirpur", "Trishal", "Valuka"
-        ],
-        "Rajshahi": [
-            "Badalgachhi", "Bagmara", "Baraigram", "Boalia",
-            "Charghat", "Durgapura", "Godagari", "Gurudaspur",
-            "Mahadipur", "Mohanpur", "Motihar", "Naogaon",
-            "Nator", "Patnitala", "Paba", "Rajpara",
-            "Shah Makhdum", "Singra", "Tanore"
-        ],
-        "Rangpur": [
-            "Badarganj", "Birganj", "Dinajpur", "Fulchari",
-            "Gaibandha", "Gangachara", "Hakimpur", "Kaunia",
-            "Khansama", "Mithapukur", "Nawabganj", "Panchagarh",
-            "Pirgachha", "Pirganj", "Sadar", "Sadullapur",
-            "Sundarganj", "Taraganj"
-        ],
-        "Sylhet": [
-            "Beanibazar", "Bishwanath", "Chhatak", "Companiganj",
-            "Dowarabazar", "Fenchuganj", "Golapganj", "Jaintiapur",
-            "Kanaighat", "Moulvibazar", "Osmani Nagar", "Sadar",
-            "Sreemangal", "Sunamganj", "Talifganj", "Zakiganj"
-        ]
-    };
-
-    function loadAreas() {
-        const districtSelect = document.getElementById("district");
-        const areaSelect = document.getElementById("upazila");
-        const selectedDistrict = districtSelect.value;
-
-        // আগের অপশন ক্লিয়ার করা
-        areaSelect.innerHTML = '<option value="" disabled selected>Select Area</option>';
-
-        if (selectedDistrict && locationData[selectedDistrict]) {
-            // ওই জেলার এরিয়াগুলো সর্ট করে অপশন বানানো
-            const sortedAreas = locationData[selectedDistrict].sort();
-
-            sortedAreas.forEach(function(area) {
-                const option = document.createElement("option");
-                option.value = area;
-                option.text = area;
-                areaSelect.appendChild(option);
-            });
-        } else {
-            // যদি ডাটা না থাকে
-            const option = document.createElement("option");
-            option.text = "No area found";
-            areaSelect.appendChild(option);
-        }
-    }
-</script>
