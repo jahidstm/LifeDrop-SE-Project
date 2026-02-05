@@ -13,8 +13,12 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'phone',
         'password',
+        'phone',
+        'blood_group', // নতুন
+        'district',    // নতুন
+        'upazila',     // নতুন
+        'availability_status', // নতুন
         'role',
         'status',
     ];
