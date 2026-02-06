@@ -84,3 +84,4 @@ php artisan migrate --seed
 # ৪. প্রজেক্ট রান করুন
 npm run dev
 php artisan serve
+
